@@ -1,0 +1,129 @@
+class SudokuSolver {
+
+ cell(row, column){
+  return column + (9 * row);
+ }
+
+ coordinateCell(length){
+  let row = (length - (length%9))/9 ;
+  let column = (length - row*9);
+
+  return [row, column];
+ }
+
+
+ validate(puzzleString){
+    let regex = /[^\d\.]/ig;
+    let charactersTest = regex.test(puzzleString);
+    let lengthTest = puzzleString.length == 81;
+  
+    return {charactersTest, lengthTest};
+  }
+
+  checkRowPlacement(puzzleString, row, col, value){
+    row = row * 9 ;
+    let limit = row + 9;
+    let result = false; 
+    
+    for(let j = row; j < limit; j++){ 
+      if(puzzleString[j] == value) result = true;
+    };
+
+    return result;
+  }
+
+  checkColPlacement(puzzleString, row, col, value) {
+    let result = false
+    let limit = 81;
+
+    for(let j = col; j < limit; j += 9){
+      if(puzzleString[j] == value) result = true;
+    };
+
+    return result;
+  }
+
+  checkRegionPlacement(puzzleString, row, col, value) {
+    let result = false;
+    
+    //Look for the beginning of the square
+    while(row%3 != 0 || col%3 != 0){
+     if(row%3 !=0){
+      row -= 1;
+     }else{
+      col -= 1;
+     };
+    };
+   
+    const limitRow = row + 2;
+    const limitColumn = col + 2;
+     
+    //Iterates the square going left to right, top to bottom
+   do{
+     let square = puzzleString[this.cell(row, col)];
+     
+      if(square == value){
+        result = true;
+     // break;
+       };
+       if(row < limitRow && col == limitColumn ){
+        row++
+        col -= 2;
+       }else{
+        col += 1;
+       };
+    }while(row < limitRow || col <= limitColumn);
+
+    return result;
+  }
+
+  solve(puzzleString) {
+    let puzzleArray = puzzleString.split("")
+  
+    let puzzle = puzzleArray
+    .map((value, index) => ({value: 0, coordinate: this.coordinateCell(index), valid: value == "."?true:false}) , this)
+    .filter((element) => element.valid );
+    let count = 0;
+    for(let index = 0; index < puzzle.length; index++){
+      for(let value = puzzle[index].value + 1; value <= 10; value++){
+        count++
+        if(count>500){;
+          break;
+        }
+        
+
+        let coordinate = puzzle[index].coordinate;
+        let rowConflict = this.checkRowPlacement(puzzleArray, coordinate[0],  coordinate[1], value);
+        let colConflict = this.checkColPlacement(puzzleArray,  coordinate[0],  coordinate[1], value);
+        let regionConflict = this.checkRegionPlacement(puzzleArray,  coordinate[0],  coordinate[1], value);
+        let valid = !(rowConflict || colConflict || regionConflict);
+
+        console.log(index, value, puzzle[index],{valid, rowConflict, colConflict, regionConflict})
+       
+        if(valid && value < 10){
+          puzzle[index].value = value;
+          puzzleArray[this.cell(coordinate[0], coordinate[1])] = value;
+          break;
+        }else if(value > 9){  
+          puzzle[index].value = 0;
+          puzzleArray[this.cell(coordinate[0], coordinate[1])] = value;
+          index-=2;
+          break;
+         };
+      };
+    };
+ //console.log(puzzle)
+  
+  
+    // puzzle.forEach(function(element){
+    //   let coordinate = element.coordinate;
+
+    //   puzzleArray[this.cell(coordinate[0], coordinate[1])] = String(element.value)
+    // }, this);
+
+    return puzzleArray.join("")
+  }
+}
+
+module.exports = SudokuSolver;
+

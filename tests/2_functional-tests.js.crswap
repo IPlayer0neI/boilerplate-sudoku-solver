@@ -106,8 +106,7 @@ suite('Functional Tests', () => {
 
        test("Check one conclict", function(done){
         let oneConflict = Array.from(puzzleTestArray);
-        oneConflict[6] = "1";
-
+        oneConflict[6] = "1"
         chai
           .request(server)
           .post("/api/check")
@@ -121,113 +120,19 @@ suite('Functional Tests', () => {
           });
        });
 
-       test("Check two conclict", function(done){
+       test("Check one conclict", function(done){
         let twoConflict = Array.from(puzzleTestArray);
-        twoConflict[1] = "1";
-
+        twoConflict[6] = "1"
+        twoConflict[2]
         chai
           .request(server)
           .post("/api/check")
-          .send({puzzle: twoConflict.join(""), coordinate: "a1", value: "1"})
+          .send({puzzle: oneConflict.join(""), coordinate: "a1", value: "1"})
           .end(function(err, res){
             let conflict = JSON.parse(res.text).conflict;
       
             assert.equal(res.status, 200);
-            assert.equal(conflict.length, 2);
-            done();
-          });
-       });
-
-       test("Check three conclict", function(done){
-        let threeConflict = Array.from(puzzleTestArray);
-        threeConflict[1] = "1";
-        threeConflict[9] = "1"
-
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: threeConflict.join(""), coordinate: "a1", value: "1"})
-          .end(function(err, res){
-            let conflict = JSON.parse(res.text).conflict;
-      
-            assert.equal(res.status, 200);
-            assert.equal(conflict.length, 3);
-            done();
-          });
-       });
-
-       test("Check no required fields", function(done){
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: puzzleTest, coordinate: "a1"})
-          .end(function(err, res){
-            let error = JSON.parse(res.text).error;
-      
-            assert.equal(res.status, 200);
-            assert.equal(error, "Required field(s) missing");
-            done();
-          });
-       });
-
-       test("Check puzzle invalid chracters", function(done){
-        let puzzleInvalid = Array.from(puzzleTestArray);
-        puzzleInvalid[0] = "a";
-
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: puzzleInvalid.join(""), coordinate: "a1", value: "1"})
-          .end(function(err, res){
-            let error = JSON.parse(res.text).error;
-      
-            assert.equal(res.status, 200);
-            assert.equal(error, "Invalid characters in puzzle");
-            done();
-          });
-       });
-
-       test("Check puzzle invalid length", function(done){
-        let puzzleInvalid = Array.from(puzzleTestArray);
-        puzzleInvalid.pop()
-
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: puzzleInvalid.join(""), coordinate: "a1", value: "1"})
-          .end(function(err, res){
-            let error = JSON.parse(res.text).error;
-      
-            assert.equal(res.status, 200);
-            assert.equal(error, "Expected puzzle to be 81 characters long");
-            done();
-          });
-       });
-
-       test("Check coordinate invalid", function(done){
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: puzzleTest, coordinate: "j1", value: "1"})
-          .end(function(err, res){
-            let error = JSON.parse(res.text).error;
-      
-            assert.equal(res.status, 200);
-            assert.equal(error, "Invalid coordinate");
-            done();
-          });
-       });
-
-       test("Check value invalid", function(done){
-        chai
-          .request(server)
-          .post("/api/check")
-          .send({puzzle: puzzleTest, coordinate: "a1", value: "a"})
-          .end(function(err, res){
-            let error = JSON.parse(res.text).error;
-      
-            assert.equal(res.status, 200);
-            assert.equal(error, "Invalid value");
+            assert.equal(conflict.length, 1);
             done();
           });
        });

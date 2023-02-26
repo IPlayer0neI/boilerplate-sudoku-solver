@@ -7,6 +7,9 @@ const cors        = require('cors');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const apiRoutes         = require('./routes/api.js');
 const runner            = require('./test-runner');
+const SudokuSolver      = require('./controllers/sudoku-solver.js');
+
+let solver = new SudokuSolver();
 
 const app = express();
 
@@ -15,6 +18,48 @@ app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.post("/api/check", function(req, res, next){
+  let validate = solver.validate(req.body);
+  let error;
+  
+  if(validate.charactersTest){
+    error = "Invalid characters in puzzle";
+  }else if(validate.lengthTest){
+    error = "Expected puzzle to be 81 characters long";
+  }else if(validate.coordinateTest){
+    error = "Invalid coordinate";
+  }else if(validate.valueTest){
+    error = "Invalid value";
+  }else if(validate.allFieldsTest){ 
+    error = "Required field(s) missing";
+  };
+
+  if(error){
+    res.json({error});
+  }else{
+    next();
+  }
+})
+app.post("/api/solve", function(req, res, next){
+  let validate = solver.validate(req.body);
+  let error;
+
+  if(validate.fieldsTest.puzzle){ 
+    error = "Required field missing";
+  }else if(validate.charactersTest){
+    error = "Invalid characters in puzzle";
+  }else if(validate.lengthTest){
+    error = "Expected puzzle to be 81 characters long";
+  }else if(validate.canBeSolved){
+    error = "Puzzle cannot be solved"
+  }
+
+  if(error){
+    res.json({error});
+  }else{
+    next();
+  };
+})
 
 //Index page (static HTML)
 app.route('/')
